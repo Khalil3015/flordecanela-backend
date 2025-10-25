@@ -41,22 +41,13 @@ builder.Services.Configure<GzipCompressionProviderOptions>(o =>
 // ✅ Construir la app una sola vez
 var app = builder.Build();
 
-// Activar middleware
-app.UseResponseCompression();
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.UseCors("AllowFrontend"); // 👈 CORS debe ir antes de MapControllers
-app.MapControllers();
-
-app.Run();
 // Fuerza HTTPS/HSTS en prod
 if (!app.Environment.IsDevelopment())
 {
     app.UseHsts();
 }
-app.UseHttpsRedirection();
 
-// Cabeceras de seguridad comunes
+// 🔒 Cabeceras de seguridad comunes
 app.Use(async (ctx, next) =>
 {
     ctx.Response.Headers["X-Content-Type-Options"] = "nosniff";
@@ -66,10 +57,7 @@ app.Use(async (ctx, next) =>
     await next();
 });
 
-// Compresión
-app.UseResponseCompression();
-
-
+// Archivos estáticos con control de caché
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
@@ -85,6 +73,12 @@ app.UseStaticFiles(new StaticFileOptions
         }
     }
 });
+
+// Middleware ordenado
+app.UseResponseCompression();
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.UseCors("AllowFrontend"); // 👈 CORS debe ir antes de MapControllers
 
 
 // ---------- CATEGORÍAS ----------
@@ -432,3 +426,4 @@ static class Tiers
     public static PriceTier[] Cake(decimal price)
         => new[] { new PriceTier(1, price, "cake (21×11×7 cm)") };
 }
+
