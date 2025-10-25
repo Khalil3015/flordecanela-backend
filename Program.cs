@@ -4,11 +4,22 @@ using System.Text;
 using Microsoft.AspNetCore.ResponseCompression;
 using System.IO.Compression;
 
-// ========================= TOP-LEVEL STATEMENTS =========================
+// ================= TOP-LEVEL STATEMENTS =================
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🧩 Mueve toda esta configuración ANTES de builder.Build()
+// Habilitar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://flordecanela.netlify.app", "https://flordecanela.online")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// Compresión de respuesta
 builder.Services.AddResponseCompression(o =>
 {
     o.EnableForHttps = true;
@@ -17,22 +28,27 @@ builder.Services.AddResponseCompression(o =>
     o.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/json" });
 });
 
-builder.Services.Configure<BrotliCompressionProviderOptions>(o => 
-    o.Level = CompressionLevel.Fastest);
+builder.Services.Configure<BrotliCompressionProviderOptions>(o =>
+{
+    o.Level = CompressionLevel.Fastest;
+});
 
-builder.Services.Configure<GzipCompressionProviderOptions>(o => 
-    o.Level = CompressionLevel.Fastest);
+builder.Services.Configure<GzipCompressionProviderOptions>(o =>
+{
+    o.Level = CompressionLevel.Fastest;
+});
 
-// ✅ Ahora sí, recién construyes la app
+// ✅ Construir la app una sola vez
 var app = builder.Build();
 
-// Activar la compresión
+// Activar middleware
 app.UseResponseCompression();
-
 app.UseHttpsRedirection();
-app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseAuthorization();
+app.UseCors("AllowFrontend"); // 👈 CORS debe ir antes de MapControllers
+app.MapControllers();
 
+app.Run();
 // Fuerza HTTPS/HSTS en prod
 if (!app.Environment.IsDevelopment())
 {
