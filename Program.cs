@@ -19,7 +19,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Agregar autorización (⚡ NECESARIO para evitar el error en Render)
+// ⚙️ Agregar controladores y autorización (ambos son necesarios)
+builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 
 // Compresión de respuesta
@@ -82,8 +83,7 @@ app.UseResponseCompression();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.UseCors("AllowFrontend"); // 👈 CORS debe ir antes de MapControllers
-app.MapControllers();
-
+app.MapControllers(); // ✅ ahora funcionará correctamente
 // ---------- CATEGORÍAS ----------
 var categories = new List<Category> {
     new("salados","Bocaditos salados"),
