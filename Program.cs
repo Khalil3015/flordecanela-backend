@@ -79,7 +79,7 @@ app.UseResponseCompression();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.UseCors("AllowFrontend"); // 👈 CORS debe ir antes de MapControllers
-
+app.MapControllers();
 
 // ---------- CATEGORÍAS ----------
 var categories = new List<Category> {
