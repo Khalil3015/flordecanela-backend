@@ -19,6 +19,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Agregar autorización (⚡ NECESARIO para evitar el error en Render)
+builder.Services.AddAuthorization();
+
 // Compresión de respuesta
 builder.Services.AddResponseCompression(o =>
 {
